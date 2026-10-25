@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>100-Day Challenge — Task Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+</head>
+<body data-theme="dark">
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-badge">
+          <span class="badge-dot"></span>
+          <span>100-DAY CHALLENGE</span>
+        </div>
+        <h1 class="app-title">Daily Task Tracker</h1>
+        <p class="app-subtitle">
+          From <span class="highlight-date">Mon, 26 Oct 2026</span> to <span class="highlight-date">Tue, 2 Feb 2027</span> &bull; 100 Days of Consistency
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="btn btn-secondary btn-icon" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
+          <span class="theme-icon light-icon" aria-hidden="true">☀️</span>
+          <span class="theme-icon dark-icon" aria-hidden="true">🌙</span>
+          <span class="btn-text">Theme</span>
+        </button>
+        <button id="jumpTodayBtn" class="btn btn-primary" title="Scroll directly to today's row">
+          <span class="btn-icon">🎯</span> Jump to Today
+        </button>
+        <div class="dropdown-wrapper">
+          <button id="dataMenuBtn" class="btn btn-secondary btn-icon" title="Data Backup Options">
+            <span>⚙️</span> Data
+          </button>
+          <div id="dataMenu" class="dropdown-menu hidden">
+            <button id="exportDataBtn" class="dropdown-item">
+              <span>📥</span> Export Backup (.json)
+            </button>
+            <label class="dropdown-item file-label">
+              <span>📤</span> Import Backup
+              <input type="file" id="importFileInput" accept=".json" class="hidden-input">
+            </label>
+            <button id="resetDataBtn" class="dropdown-item item-danger">
+              <span>🗑️</span> Reset All Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Stats Dashboard -->
+    <section class="stats-grid" aria-label="Challenge Statistics">
+      <div class="stat-card streak-card">
+        <div class="stat-icon-wrapper flame-glow">
+          <span class="stat-icon">🔥</span>
+        </div>
+        <div class="stat-details">
+          <div class="stat-label">CURRENT STREAK</div>
+          <div class="stat-value" id="currentStreakValue">0 <span class="stat-unit">days</span></div>
+          <div class="stat-subtext" id="streakSubtext">Complete all 5 tasks today to build your streak!</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper">
+          <span class="stat-icon">🏆</span>
+        </div>
+        <div class="stat-details">
+          <div class="stat-label">BEST STREAK</div>
+          <div class="stat-value" id="bestStreakValue">0 <span class="stat-unit">days</span></div>
+          <div class="stat-subtext">Highest consecutive days completed</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper">
+          <span class="stat-icon">📅</span>
+        </div>
+        <div class="stat-details">
+          <div class="stat-label">DAYS FULLY COMPLETED</div>
+          <div class="stat-value" id="completedDaysValue">0 <span class="stat-unit">/ 100</span></div>
+          <div class="stat-subtext" id="daysPercentSubtext">0% of total challenge days</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper">
+          <span class="stat-icon">⚡</span>
+        </div>
+        <div class="stat-details">
+          <div class="stat-label">TOTAL TASKS CHECKED</div>
+          <div class="stat-value" id="totalTasksValue">0 <span class="stat-unit">/ 500</span></div>
+          <div class="stat-subtext">
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" id="overallProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls & Filters Toolbar -->
+    <section class="toolbar">
+      <div class="filters-group" role="tablist" aria-label="Filter Days">
+        <button class="filter-chip active" data-filter="all" role="tab" aria-selected="true">
+          All Days <span class="chip-count" id="countAll">100</span>
+        </button>
+        <button class="filter-chip" data-filter="completed" role="tab" aria-selected="false">
+          Fully Completed <span class="chip-count" id="countCompleted">0</span>
+        </button>
+        <button class="filter-chip" data-filter="in-progress" role="tab" aria-selected="false">
+          In Progress <span class="chip-count" id="countInProgress">0</span>
+        </button>
+        <button class="filter-chip" data-filter="unstarted" role="tab" aria-selected="false">
+          Unstarted <span class="chip-count" id="countUnstarted">100</span>
+        </button>
+      </div>
+
+      <div class="toolbar-right">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchDayInput" placeholder="Search date (e.g. Nov 14)..." aria-label="Search date">
+          <button id="clearSearchBtn" class="clear-search-btn hidden" aria-label="Clear search">&times;</button>
+        </div>
+        <div class="status-indicator" id="saveStatusIndicator">
+          <span class="indicator-dot"></span>
+          <span class="indicator-text">All changes saved</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Tracker Table Container -->
+    <main class="table-card">
+      <div class="table-responsive" id="tableContainer">
+        <table class="challenge-table" id="trackerTable">
+          <thead>
+            <tr>
+              <th class="col-date sticky-col">
+                <div class="th-content">
+                  <span class="th-title">Date (Y-axis)</span>
+                  <span class="th-sub">100 Consecutive Days</span>
+                </div>
+              </th>
+              <th class="col-task" data-task-id="dsa">
+                <div class="th-content">
+                  <div class="th-badge badge-dsa">Task 1</div>
+                  <span class="th-title">DSA (2 questions)</span>
+                  <span class="th-sub">Solve 2 DSA problems</span>
+                </div>
+              </th>
+              <th class="col-task" data-task-id="mcqs">
+                <div class="th-content">
+                  <div class="th-badge badge-mcqs">Task 2</div>
+                  <span class="th-title">MCQs (10)</span>
+                  <span class="th-sub">Complete 10 MCQs</span>
+                </div>
+              </th>
+              <th class="col-task" data-task-id="english">
+                <div class="th-content">
+                  <div class="th-badge badge-english">Task 3</div>
+                  <span class="th-title">English (90 min)</span>
+                  <span class="th-sub">English Practice 1h 30m</span>
+                </div>
+              </th>
+              <th class="col-task" data-task-id="project">
+                <div class="th-content">
+                  <div class="th-badge badge-project">Task 4</div>
+                  <span class="th-title">Project (2 hours)</span>
+                  <span class="th-sub">Project Development</span>
+                </div>
+              </th>
+              <th class="col-task" data-task-id="trading">
+                <div class="th-content">
+                  <div class="th-badge badge-trading">Task 5</div>
+                  <span class="th-title">Trading (2 tasks)</span>
+                  <span class="th-sub">Complete 2 trading tasks</span>
+                </div>
+              </th>
+              <th class="col-progress">
+                <div class="th-content">
+                  <span class="th-title">Daily Progress</span>
+                  <span class="th-sub">Completion (5 tasks)</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="trackerTableBody">
+            <!-- 100 rows generated dynamically by app.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="noResultsMessage" class="no-results hidden">
+        <div class="no-results-icon">🔎</div>
+        <h3>No matching dates found</h3>
+        <p>Try adjusting your search filter.</p>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-info">
+        <span>100-Day Challenge: Oct 26, 2026 – Feb 2, 2027</span>
+        <span class="footer-divider">&bull;</span>
+        <span>Auto-saves locally in your browser</span>
+      </div>
+      <div class="footer-links">
+        <button id="scrollTopBtn" class="link-btn">↑ Back to Top</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
